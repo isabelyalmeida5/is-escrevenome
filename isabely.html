@@ -1,0 +1,150 @@
+let screenXcenter = 300;
+let screenYcenter = 200;
+//ball
+let ball_x = screenXcenter;
+let ball_y = screenYcenter;
+let ball_d = 10;
+let ball_r = ball_d / 2;
+let ballX_speed = 5;
+let ballY_speed = 5;
+let hit = false;
+//racket player
+let rackp_x = 15;
+let rackp_y = 150;
+let rackp_w = 5;
+let rackp_h = 80;
+let rackp_speed = 1;
+//racket player 2
+let rackb_x = 580;
+let rackb_y = 150;
+let rackb_w = 5;
+let rackb_h = 80;
+let rackb_speed = 1;
+//Score
+let score_player = 0;
+let score_bot = 0;
+//Sound Effects
+let sound_racket;
+let sound_score;
+let sound_background;
+
+function preload() {
+  sound_racket = loadSound("raquetada.mp3");
+  sound_score = loadSound("ponto.mp3");
+  sound_background = loadSound("trilha.mp3");
+}
+
+function setup() {
+  createCanvas(600, 400);
+  sound_background.loop();
+}
+
+function draw() {
+  screenSetup();
+  ballCreate();
+  ballMove();
+  racketPlayer();
+  racketPlayer2();
+  gameScore();
+}
+
+function screenSetup() {
+  background(33);
+  noStroke();
+  fill(255);
+  rect(5, 5, 590, 390);
+  fill(0);
+  rect(10, 10, 287.5, 380);
+  rect(302.5, 10, 287.5, 380);
+  fill(255);
+  stroke(1);
+  //rect(screenXcenter - 2.5, 10, 5, 380);
+  
+  borderPhysix();
+}
+
+function ballCreate() {
+  circle(ball_x, ball_y, ball_d);
+  if (ball_x < 0 || ball_x > width || ball_y < 0 || ball_y > height) {
+    ball_x = screenXcenter;
+    ball_y = screenYcenter;
+  }
+}
+
+function ballMove() {
+  ball_x += ballX_speed;
+  ball_y += ballY_speed;
+}
+
+function borderPhysix() {
+  if (ball_x <= 0 + ball_r || ball_x >= width - ball_r) {
+    ballX_speed *= -1;
+  }
+  if (ball_y <= 0 + ball_r || ball_y >= height - ball_r) {
+    ballY_speed *= -1;
+  }
+  if ((ball_y - ball_r < 1)||(ball_y + ball_r > 399)){
+    sound_racket.play();
+  }
+  
+  //marca pontuação
+  if (ball_x - ball_r < 1) {
+    score_bot++;
+    
+    sound_score.play();
+  }
+  if (ball_x + ball_r > 599) {
+    score_player++;
+    
+    sound_score.play();
+  }
+}
+
+function racketPlayer() {
+  rect(rackp_x, rackp_y, rackp_w, rackp_h);
+  if (rackp_y > 0) {
+    if (keyIsDown(87)) {
+      rackp_y -= 10;
+    }
+  }
+  if (rackp_y + rackp_h < height) {
+    if (keyIsDown(83)) {
+      rackp_y += 10;
+    }
+  }
+  hitPhysix(rackp_x, rackp_y, rackp_w, rackp_h);
+}
+
+function racketPlayer2() {
+  rect(rackb_x, rackb_y, rackb_w, rackb_h);
+  if (rackb_y > 0) {
+    if (keyIsDown(UP_ARROW)) {
+      rackb_y -= 10;
+    }
+  }
+  if (rackb_y + rackb_h < height) {
+    if (keyIsDown(DOWN_ARROW)) {
+      rackb_y += 10;
+    }
+  }
+  hitPhysix(rackb_x, rackb_y, rackb_w, rackb_h);
+}
+
+function hitPhysix(x, y, w, h) {
+  hit = collideRectCircle(x, y, w, h, ball_x, ball_y, ball_r);
+  if (hit) {
+    ballX_speed *= -1;
+    sound_racket.play();
+  }
+}
+
+function gameScore() {
+  textAlign(CENTER);
+  fill(color(255, 140, 0));
+  rect(200, 13, 40, 20);
+  rect(362.5, 13, 40, 20);
+  fill(255);
+  textSize(18);
+  text(score_player, 220, 30);
+  text(score_bot, 382.5, 30);
+}
